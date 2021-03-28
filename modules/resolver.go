@@ -4,12 +4,13 @@ import (
 	"context"
 	"redirecter/configuration/changes"
 	"redirecter/server/correlation"
+	"strings"
 
 	"go.uber.org/zap"
 )
 
 type Resolver interface {
-	Resolve(url string, ctx context.Context) (*Repository, bool, error)
+	Resolve(url string, ctx context.Context) (*Repository, bool, bool, error)
 }
 
 func NewResolver(configuration Configuration, notifier changes.ConfigurationChangeNotifier, logger *zap.Logger) Resolver {
@@ -37,15 +38,15 @@ func (r *resolver) reloadModulesFromConfiguration() error {
 	return nil
 }
 
-func (r *resolver) Resolve(url string, ctx context.Context) (*Repository, bool, error) {
+func (r *resolver) Resolve(url string, ctx context.Context) (*Repository, bool, bool, error) {
 	r.logger.Info("Resolving package", zap.String("url", url), zap.String("correlation", correlation.CorrelationFromContext(ctx)))
 
 	for mappingURL, repository := range r.modules {
-		if url == mappingURL {
+		if strings.HasPrefix(url, mappingURL) {
 			r.logger.Info("Found package", zap.String("url", url), zap.String("type", repository.Type), zap.String("repository", repository.Source), zap.String("correlation", correlation.CorrelationFromContext(ctx)))
-			return &repository, true, nil
+			return &repository, url == mappingURL, true, nil
 		}
 	}
 
-	return nil, false, nil
+	return nil, false, false, nil
 }

@@ -12,28 +12,30 @@ type Responder interface {
 	RespondTo(w http.ResponseWriter, url string, goGet bool, ctx context.Context) error
 }
 
-func NewResponder(resolver Resolver, writer Writer, logger *zap.Logger) Responder {
+func NewResponder(configuration Configuration, resolver Resolver, writer Writer, logger *zap.Logger) Responder {
 	return &responder{
-		resolver: resolver,
-		writer:   writer,
-		logger:   logger,
+		configuration: configuration,
+		resolver:      resolver,
+		writer:        writer,
+		logger:        logger,
 	}
 }
 
 type responder struct {
-	resolver Resolver
-	writer   Writer
-	logger   *zap.Logger
+	configuration Configuration
+	resolver      Resolver
+	writer        Writer
+	logger        *zap.Logger
 }
 
 func (r *responder) RespondTo(w http.ResponseWriter, url string, goGet bool, ctx context.Context) error {
-	repository, found, err := r.resolver.Resolve(url, ctx)
+	repository, exactMatch, found, err := r.resolver.Resolve(url, ctx)
 	if err != nil {
 		r.logger.Error("Failed to resolve", zap.Error(err), zap.String("url", url), zap.String("correlation", correlation.CorrelationFromContext(ctx)))
 		return err
 	}
 
-	if !found {
+	if !found || goGet && !exactMatch {
 		w.WriteHeader(http.StatusNotFound)
 		r.writer.WriteNotFoundResponse(w, url, ctx)
 		return nil
@@ -43,7 +45,8 @@ func (r *responder) RespondTo(w http.ResponseWriter, url string, goGet bool, ctx
 		w.WriteHeader(http.StatusOK)
 		r.writer.WriteGoGetResponse(w, url, repository, ctx)
 	} else {
-		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Location", r.configuration.Documentation()+url)
+		w.WriteHeader(http.StatusFound)
 		r.writer.WriteUserResponse(w, url, repository, ctx)
 	}
 

@@ -131,18 +131,27 @@ func (w *writer) comparePaths(left, right string) bool {
 }
 
 type foundTemplateData struct {
-	Module string
+	Module        string
+	Documentation string
 	*Repository
 }
 
 func (w *writer) WriteGoGetResponse(writer io.Writer, url string, repository *Repository, ctx context.Context) error {
 	w.logger.Info("Writing go get response", zap.String("url", url), zap.String("repository", repository.Source), zap.String("correlation", correlation.CorrelationFromContext(ctx)))
-	return w.templateGoGet.Execute(writer, foundTemplateData{Module: url, Repository: repository})
+	return w.templateGoGet.Execute(writer, foundTemplateData{
+		Module:        url,
+		Documentation: w.configuration.Documentation() + url,
+		Repository:    repository,
+	})
 }
 
 func (w *writer) WriteUserResponse(writer io.Writer, url string, repository *Repository, ctx context.Context) error {
 	w.logger.Info("Writing user response", zap.String("url", url), zap.String("repository", repository.Source), zap.String("correlation", correlation.CorrelationFromContext(ctx)))
-	return w.templateUser.Execute(writer, foundTemplateData{Module: url, Repository: repository})
+	return w.templateUser.Execute(writer, foundTemplateData{
+		Module:        url,
+		Documentation: w.configuration.Documentation() + url,
+		Repository:    repository,
+	})
 }
 
 type notFoundTemplateData struct {
@@ -151,5 +160,7 @@ type notFoundTemplateData struct {
 
 func (w *writer) WriteNotFoundResponse(writer io.Writer, url string, ctx context.Context) error {
 	w.logger.Info("Writing not found response", zap.String("url", url), zap.String("correlation", correlation.CorrelationFromContext(ctx)))
-	return w.templateNotFound.Execute(writer, notFoundTemplateData{Module: url})
+	return w.templateNotFound.Execute(writer, notFoundTemplateData{
+		Module: url,
+	})
 }

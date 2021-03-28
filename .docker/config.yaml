@@ -2,6 +2,7 @@ serve:
   port: 8080
 
 modules:
+  documentation: https://pkg.go.dev/
   templates:
     go-get: /var/lib/redirecter/go-get.html
     user: /var/lib/redirecter/user.html

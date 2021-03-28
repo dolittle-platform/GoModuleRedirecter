@@ -27,7 +27,7 @@ func NewContainer(config Configuration) (*Container, error) {
 
 	container.Resolver = modules.NewResolver(config.Modules(), container.Notifier, logger)
 	container.Writer = modules.NewWriter(config.Modules(), container.Notifier, logger)
-	container.Responder = modules.NewResponder(container.Resolver, container.Writer, logger)
+	container.Responder = modules.NewResponder(config.Modules(), container.Resolver, container.Writer, logger)
 
 	container.Server = server.NewServer(config.Server(), container.Notifier, container.Responder, logger)
 

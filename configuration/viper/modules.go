@@ -7,11 +7,13 @@ import (
 )
 
 const (
+	modulesDocumentationKey     = "modules.documentation"
 	modulesTemplatesGoGetKey    = "modules.templates.go-get"
 	modulesTemplatesUserKey     = "modules.templates.user"
 	modulesTemplatesNotFoundKey = "modules.templates.not-found"
 	modulesMappingsKey          = "modules.mappings"
 
+	defaultModulesDocumentation     = "https://pkg.go.dev/"
 	defaultModulesTemplatesGoGet    = "/var/lib/redirecter/go-get.html"
 	defaultModulesTemplatesUser     = "/var/lib/redirecter/user.html"
 	defaultModulesTemplatesNotFound = "/var/lib/redirecter/not-found.html"
@@ -27,6 +29,13 @@ type moduleMappingEntry struct {
 	Module string
 	Type   string
 	Source string
+}
+
+func (c *modulesConfiguration) Documentation() string {
+	if path := viper.GetString(modulesDocumentationKey); path != "" {
+		return path
+	}
+	return defaultModulesDocumentation
 }
 
 func (c *modulesConfiguration) TemplateGoGetPath() string {

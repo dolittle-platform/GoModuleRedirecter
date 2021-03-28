@@ -13,8 +13,8 @@ import (
 )
 
 type Writer interface {
-	WriteGoGetResponse(writer io.Writer, url string, repository *Repository, ctx context.Context) error
-	WriteUserResponse(writer io.Writer, url string, repository *Repository, ctx context.Context) error
+	WriteGoGetResponse(writer io.Writer, url string, match *Match, ctx context.Context) error
+	WriteUserResponse(writer io.Writer, url string, match *Match, ctx context.Context) error
 	WriteNotFoundResponse(writer io.Writer, url string, ctx context.Context) error
 }
 
@@ -133,24 +133,30 @@ func (w *writer) comparePaths(left, right string) bool {
 type foundTemplateData struct {
 	Module        string
 	Documentation string
-	*Repository
+	Type          string
+	Source        string
+	MajorVersion  string
 }
 
-func (w *writer) WriteGoGetResponse(writer io.Writer, url string, repository *Repository, ctx context.Context) error {
-	w.logger.Info("Writing go get response", zap.String("url", url), zap.String("repository", repository.Source), zap.String("correlation", correlation.CorrelationFromContext(ctx)))
+func (w *writer) WriteGoGetResponse(writer io.Writer, url string, match *Match, ctx context.Context) error {
+	w.logger.Info("Writing go get response", zap.String("url", url), zap.String("repository", match.Repository.Source), zap.String("correlation", correlation.CorrelationFromContext(ctx)))
 	return w.templateGoGet.Execute(writer, foundTemplateData{
 		Module:        url,
 		Documentation: w.configuration.Documentation() + url,
-		Repository:    repository,
+		Type:          match.Repository.Type,
+		Source:        match.Repository.Source,
+		MajorVersion:  match.MajorVersion,
 	})
 }
 
-func (w *writer) WriteUserResponse(writer io.Writer, url string, repository *Repository, ctx context.Context) error {
-	w.logger.Info("Writing user response", zap.String("url", url), zap.String("repository", repository.Source), zap.String("correlation", correlation.CorrelationFromContext(ctx)))
+func (w *writer) WriteUserResponse(writer io.Writer, url string, match *Match, ctx context.Context) error {
+	w.logger.Info("Writing user response", zap.String("url", url), zap.String("repository", match.Repository.Source), zap.String("correlation", correlation.CorrelationFromContext(ctx)))
 	return w.templateUser.Execute(writer, foundTemplateData{
 		Module:        url,
 		Documentation: w.configuration.Documentation() + url,
-		Repository:    repository,
+		Type:          match.Repository.Type,
+		Source:        match.Repository.Source,
+		MajorVersion:  match.MajorVersion,
 	})
 }
 

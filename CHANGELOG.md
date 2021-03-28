@@ -1,3 +1,13 @@
+# [0.0.2] - 2021-3-28 [PR: #2](https://github.com/dolittle-platform/GoModuleRedirecter/pull/2)
+## Summary
+
+Fixed tag in docker push action to the correct output.
+
+### Fixed
+
+- Fixed tag in docker push action to the correct output.
+
+
 # [0.0.1] - 2021-3-28 [PR: #1](https://github.com/dolittle-platform/GoModuleRedirecter/pull/1)
 ## Summary
 

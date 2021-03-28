@@ -54,4 +54,4 @@ jobs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        tags: dolittle/go-module-redirecter:${{ steps.context.outputs.next-version }},dolittle/go-module-redirecter:latest
+        tags: dolittle/go-module-redirecter:${{ steps.increment-version.outputs.next-version }},dolittle/go-module-redirecter:latest

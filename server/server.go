@@ -18,6 +18,7 @@ func NewServer(configuration Configuration, notifier changes.ConfigurationChange
 	return &server{
 		configuration:    configuration,
 		notifier:         notifier,
+		handler:          newHandler(configuration, logger),
 		logger:           logger,
 		shutdownComplete: make(chan struct{}),
 	}
@@ -26,6 +27,7 @@ func NewServer(configuration Configuration, notifier changes.ConfigurationChange
 type server struct {
 	configuration    Configuration
 	notifier         changes.ConfigurationChangeNotifier
+	handler          http.Handler
 	logger           *zap.Logger
 	httpServer       *http.Server
 	shutdownComplete chan struct{}
@@ -56,6 +58,7 @@ func (s *server) run() error {
 
 	s.logger.Info("Starting server", zap.Int("port", s.configuration.Port()))
 	s.httpServer.Addr = fmt.Sprintf(":%d", s.configuration.Port())
+	s.httpServer.Handler = s.handler
 
 	return s.httpServer.ListenAndServe()
 }

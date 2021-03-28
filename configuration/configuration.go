@@ -5,5 +5,7 @@ import (
 )
 
 type Configuration interface {
+	OnChange(callback func())
+
 	Server() server.Configuration
 }

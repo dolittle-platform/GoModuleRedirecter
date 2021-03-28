@@ -5,6 +5,7 @@ import (
 	"redirecter/server"
 	"strings"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 )
@@ -28,6 +29,8 @@ func NewViperConfiguration(configPath string) (config.Configuration, error) {
 		return nil, err
 	}
 
+	viper.WatchConfig()
+
 	return &configuration{
 		server: &serverConfiguration{},
 	}, nil
@@ -35,6 +38,12 @@ func NewViperConfiguration(configPath string) (config.Configuration, error) {
 
 type configuration struct {
 	server *serverConfiguration
+}
+
+func (c *configuration) OnChange(callback func()) {
+	viper.OnConfigChange(func(in fsnotify.Event) {
+		callback()
+	})
 }
 
 func (c *configuration) Server() server.Configuration {

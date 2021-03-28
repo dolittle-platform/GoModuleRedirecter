@@ -1,2 +1,12 @@
 serve:
   port: 8080
+
+modules:
+  templates:
+    go-get: /var/lib/redirecter/go-get.html
+    user: /var/lib/redirecter/user.html
+    not-found: /var/lib/redirecter/not-found.html
+  mappings:
+    - module: go.dolittle.io/contracts
+      type: github
+      source: https://github.com/dolittle/Go.Contracts

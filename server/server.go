@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"redirecter/configuration/changes"
+	"redirecter/modules"
 	"time"
 
 	"go.uber.org/zap"
@@ -14,11 +15,11 @@ type Server interface {
 	Run() error
 }
 
-func NewServer(configuration Configuration, notifier changes.ConfigurationChangeNotifier, logger *zap.Logger) Server {
+func NewServer(configuration Configuration, notifier changes.ConfigurationChangeNotifier, responder modules.Responder, logger *zap.Logger) Server {
 	return &server{
 		configuration:    configuration,
 		notifier:         notifier,
-		handler:          newHandler(configuration, logger),
+		handler:          newHandler(configuration, responder, logger),
 		logger:           logger,
 		shutdownComplete: make(chan struct{}),
 	}

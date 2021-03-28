@@ -2,6 +2,8 @@ package server
 
 import (
 	"net/http"
+	"redirecter/modules"
+	"redirecter/server/correlation"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -12,26 +14,34 @@ const (
 	GoGetQueryName  = "go-get"
 )
 
-func newHandler(configuration Configuration, logger *zap.Logger) http.Handler {
+func newHandler(configuration Configuration, responder modules.Responder, logger *zap.Logger) http.Handler {
 	return &handler{
 		configuration: configuration,
+		responder:     responder,
 		logger:        logger,
 	}
 }
 
 type handler struct {
 	configuration Configuration
+	responder     modules.Responder
 	logger        *zap.Logger
 }
 
 func (h *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	correlation := uuid.New().String()
+	corr := uuid.New().String()
 	url := h.getFullRequestURL(r)
-	h.logger.Info("Handling request", zap.String("correlation", correlation), zap.String("url", url))
+	h.logger.Info("Handling request", zap.String("correlation", corr), zap.String("url", url))
 
-	defer h.recoverPanic(w, r, correlation)
+	defer h.recoverPanic(w, r, corr)
 
-	h.isGoGetRequest(r)
+	ctx := correlation.ContextWithCorrelation(r.Context(), corr)
+
+	isGoGetRequest := h.isGoGetRequest(r)
+
+	if err := h.responder.RespondTo(w, url, isGoGetRequest, ctx); err != nil {
+		h.logger.Error("Failed to respond to request", zap.Error(err), zap.String("correlation", corr), zap.String("url", url))
+	}
 }
 
 func (h *handler) getFullRequestURL(r *http.Request) string {

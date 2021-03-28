@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{{ .Module }}</title>
+        <meta name="go-import" content="{{ .Module }} git {{ .Source }}.git"/>
+    </head>
+    <body>
+        <p>The source for {{ .Module }} is found here <a href="{{ .Source }}">{{ .Source }}</a>.</p>
+    </body>
+</html>

@@ -2,6 +2,7 @@ package viper
 
 import (
 	config "redirecter/configuration"
+	"redirecter/modules"
 	"redirecter/server"
 	"strings"
 
@@ -22,7 +23,7 @@ func NewViperConfiguration(configPath string) (config.Configuration, error) {
 		viper.SetConfigName(".redirecter")
 	}
 
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_", "-", "_"))
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
@@ -32,18 +33,24 @@ func NewViperConfiguration(configPath string) (config.Configuration, error) {
 	viper.WatchConfig()
 
 	return &configuration{
-		server: &serverConfiguration{},
+		modules: &modulesConfiguration{},
+		server:  &serverConfiguration{},
 	}, nil
 }
 
 type configuration struct {
-	server *serverConfiguration
+	modules *modulesConfiguration
+	server  *serverConfiguration
 }
 
 func (c *configuration) OnChange(callback func()) {
 	viper.OnConfigChange(func(in fsnotify.Event) {
 		callback()
 	})
+}
+
+func (c *configuration) Modules() modules.Configuration {
+	return c.modules
 }
 
 func (c *configuration) Server() server.Configuration {

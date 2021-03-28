@@ -10,7 +10,12 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}",
-            "args": ["serve", "-c", ".docker/config.yaml"]
+            "args": ["serve", "-c", ".docker/config.yaml"],
+            "env": {
+                "MODULES_TEMPLATES_GO_GET": "./.docker/go-get.html",
+                "MODULES_TEMPLATES_USER": "./.docker/user.html",
+                "MODULES_TEMPLATES_NOT_FOUND": "./.docker/not-found.html",
+            }
         }
     ]
 }

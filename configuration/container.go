@@ -2,6 +2,7 @@ package configuration
 
 import (
 	"redirecter/configuration/changes"
+	"redirecter/modules"
 	"redirecter/server"
 
 	"go.uber.org/zap"
@@ -9,6 +10,10 @@ import (
 
 type Container struct {
 	Notifier changes.ConfigurationChangeNotifier
+
+	Resolver  modules.Resolver
+	Writer    modules.Writer
+	Responder modules.Responder
 
 	Server server.Server
 }
@@ -20,7 +25,11 @@ func NewContainer(config Configuration) (*Container, error) {
 	container.Notifier = changes.NewConfigurationChangeNotifier(logger)
 	config.OnChange(container.Notifier.TriggerChanged)
 
-	container.Server = server.NewServer(config.Server(), container.Notifier, logger)
+	container.Resolver = modules.NewResolver(config.Modules(), container.Notifier, logger)
+	container.Writer = modules.NewWriter(config.Modules(), container.Notifier, logger)
+	container.Responder = modules.NewResponder(container.Resolver, container.Writer, logger)
+
+	container.Server = server.NewServer(config.Server(), container.Notifier, container.Responder, logger)
 
 	return &container, nil
 }

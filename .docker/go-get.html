@@ -3,6 +3,7 @@
     <head>
         <title>{{ .Module }}</title>
         <meta name="go-import" content="{{ .Module }} git {{ .Source }}.git"/>
+        <meta name="go-source" content="{{ .Module }} {{ .Source }} {{ .Source }}/tree/main{/dir} {{ .Source }}/blob/main{/dir}/{file}#L{line}"/>
     </head>
     <body>
         <p>The source for {{ .Module }} is found here <a href="{{ .Source }}">{{ .Source }}</a>.</p>
